@@ -1,0 +1,48 @@
+<resources>
+    <string name="app_name">Schreiben auf Deutsch</string>
+
+    <!-- General -->
+    <string name="back">Zurück</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="save">Speichern</string>
+    <string name="delete">Löschen</string>
+    <string name="loading">Laden...</string>
+
+    <!-- Home Screen -->
+    <string name="home_greeting">Hallo! 👋</string>
+    <string name="home_subtitle">Bereit, heute besser zu schreiben?</string>
+    <string name="home_hero_title">Lerne Deutsch\ndurch Schreiben</string>
+    <string name="home_hero_subtitle">Erstelle deine erste Übung mit KI oder wähle ein beliebtes Thema.</string>
+    <string name="home_create_task">Eigene Aufgabe erstellen</string>
+    <string name="home_quick_start">Schnellstart</string>
+    <string name="home_your_tasks">Deine Aufgaben</string>
+    <string name="home_see_all">Alle anzeigen</string>
+
+    <!-- Create Screen -->
+    <string name="create_title">Aufgabe erstellen</string>
+    <string name="create_step_track">Lernpfad (Exam Track)</string>
+    <string name="create_step_topic">Thema</string>
+    <string name="create_step_level">Sprachniveau</string>
+    <string name="create_step_type">Aufgabentyp</string>
+    <string name="create_step_style">Stil</string>
+    <string name="create_step_customization">Smart Customization</string>
+    <string name="create_step_complexity">Komplexität</string>
+    <string name="create_generate_btn">Aufgabe generieren</string>
+    <string name="create_topic_label">Ich möchte schreiben über...</string>
+    <string name="create_topic_example_btn">Beispiel</string>
+    <string name="create_topic_placeholder">z.B. Homeoffice, Urlaub, Klimaschutz...</string>
+    <string name="create_optional">(Optional)</string>
+
+    <!-- Practice Screen -->
+    <string name="practice_progress">Dein Fortschritt</string>
+    <string name="practice_sentence_count">%1$d von %2$d Sätzen</string>
+    <string name="practice_finish">Aufgabe abschließen</string>
+    <string name="practice_finish_with_errors">Trotz Fehlern abschließen</string>
+    <string name="practice_write_here">Hier schreiben...</string>
+
+    <!-- Preview Screen -->
+    <string name="preview_saved">Gespeichert</string>
+    <string name="preview_start_task">Aufgabe starten</string>
+    <string name="preview_redo">Wiederholen</string>
+    <string name="preview_select_variation">Antwort auswählen</string>
+</resources>

@@ -1,0 +1,47 @@
+# Android Studio / IntelliJ
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+/.idea/shelf
+/.idea/indexLayout.xml
+/.idea/vcs.xml
+/.idea/codeStyles/
+/.idea/inspectionProfiles/
+*.ipr
+*.iws
+
+# Build outputs
+/build
+/*/build
+/captures
+
+# Native / C++
+.externalNativeBuild
+.cxx
+
+# OS / Misc
+.DS_Store
+Thumbs.db
+*.bak
+*.swp
+
+# Kotlin
+.kotlin
+
+# AI / Development Tools (Custom for this project)
+.agent
+.artifacts/
+input_images/
+skills-main/
+
+# Secrets (Double protection)
+local.properties
+google-services.json
+*.keystore
+*.jks
