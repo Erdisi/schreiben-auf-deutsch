@@ -44,12 +44,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.ui.res.stringResource
 import com.example.schreibenaufdeutsch.R
 import com.example.schreibenaufdeutsch.SchreibenApp
 import com.example.schreibenaufdeutsch.ui.common.SentenceCard
 import com.example.schreibenaufdeutsch.ui.common.viewmodel.viewModelFactory
 import com.example.schreibenaufdeutsch.ui.theme.SchreibenAufDeutschTheme
+import androidx.compose.ui.text.input.TextFieldValue
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,14 +76,20 @@ fun PracticeScreen(
     
     val allAttempted = remember(sentences) { sentences.isNotEmpty() && sentences.all { it.isCompleted } }
     val haptic = LocalHapticFeedback.current
+    val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
-    var userInput by remember { mutableStateOf("") }
+    var userInput by remember { mutableStateOf(TextFieldValue("")) }
     val listState = rememberLazyListState()
+    var isUmlautBarVisible by remember { mutableStateOf(true) }
 
     BackHandler(onBack = onBack)
 
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
+    LaunchedEffect(sentences) {
+        if (sentences.isNotEmpty()) {
+            delay(300) // Wait for screen entry animation/loading
+            focusRequester.requestFocus()
+            keyboardController?.show()
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -98,8 +109,11 @@ fun PracticeScreen(
     LaunchedEffect(currentIndex) {
         if (sentences.isNotEmpty()) {
             listState.animateScrollToItem(currentIndex)
-            userInput = sentences.getOrNull(currentIndex)?.lastInput ?: ""
+            val lastInput = sentences.getOrNull(currentIndex)?.lastInput ?: ""
+            userInput = TextFieldValue(text = lastInput, selection = androidx.compose.ui.text.TextRange(lastInput.length))
+            delay(100)
             focusRequester.requestFocus()
+            keyboardController?.show()
         }
     }
 
@@ -176,16 +190,18 @@ fun PracticeScreen(
                 Spacer(Modifier.height(8.dp))
                 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    sentences.forEachIndexed { index, _ ->
+                    sentences.forEach { sentence ->
+                        val color = when {
+                            sentence.isCompleted && sentence.hadError -> MaterialTheme.colorScheme.error
+                            sentence.isCompleted -> Color(0xFF4CAF50) // Success Green
+                            sentence.isCurrent -> MaterialTheme.colorScheme.primary
+                            else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                        }
                         Box(
                             modifier = Modifier
                                 .weight(1f)
-                                .height(8.dp)
-                                .background(
-                                    color = if (index <= currentIndex) MaterialTheme.colorScheme.primary 
-                                            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                    shape = RoundedCornerShape(4.dp)
-                                )
+                                .height(6.dp)
+                                .background(color, shape = CircleShape)
                         )
                     }
                 }
@@ -201,14 +217,14 @@ fun PracticeScreen(
                     items(sentences, key = { it.index }) { sentence ->
                         SentenceCard(
                             sentence = sentence,
-                            currentInput = if (sentence.isCurrent) userInput else "",
+                            currentInput = if (sentence.isCurrent) userInput else TextFieldValue(""),
                             onUserInputChange = { 
                                 userInput = it
                                 viewModel.clearFeedback()
                             },
                             onSend = {
-                                if (userInput.isNotBlank()) {
-                                    viewModel.submitSentence(userInput)
+                                if (userInput.text.isNotBlank()) {
+                                    viewModel.submitSentence(userInput.text)
                                 }
                             },
                             onSpeak = { viewModel.speak(sentence.germanText) },
@@ -241,12 +257,43 @@ fun PracticeScreen(
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     // German Umlaut Bar
-                    UmlautBar(
-                        onUmlautClick = { umlaut ->
-                            userInput += umlaut
-                            viewModel.clearFeedback()
+                    AnimatedVisibility(
+                        visible = isUmlautBarVisible,
+                        enter = expandVertically() + fadeIn(),
+                        exit = shrinkVertically() + fadeOut()
+                    ) {
+                        UmlautBar(
+                            onUmlautClick = { umlaut ->
+                                val currentText = userInput.text
+                                val selection = userInput.selection
+                                val newText = currentText.substring(0, selection.start) + umlaut + currentText.substring(selection.end)
+                                val newCursorPos = selection.start + umlaut.length
+                                
+                                userInput = TextFieldValue(
+                                    text = newText,
+                                    selection = androidx.compose.ui.text.TextRange(newCursorPos)
+                                )
+                                viewModel.clearFeedback()
+                            },
+                            onHide = { isUmlautBarVisible = false }
+                        )
+                    }
+
+                    if (!isUmlautBarVisible) {
+                        IconButton(
+                            onClick = { isUmlautBarVisible = true },
+                            modifier = Modifier
+                                .size(32.dp)
+                                .align(Alignment.Start)
+                                .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
+                        ) {
+                            Icon(
+                                Icons.Default.KeyboardArrowUp,
+                                contentDescription = "Show Umlauts",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
                         }
-                    )
+                    }
                     
                     if (allAttempted) {
                         Button(
@@ -273,46 +320,52 @@ fun PracticeScreen(
 }
 
 @Composable
-fun UmlautBar(onUmlautClick: (String) -> Unit) {
+fun UmlautBar(onUmlautClick: (String) -> Unit, onHide: () -> Unit) {
     val umlauts = listOf("ä", "ö", "ü", "ß", "Ä", "Ö", "Ü")
     Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // Toggle/Hide Button
         Surface(
-            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
-            shape = RoundedCornerShape(8.dp),
-            modifier = Modifier.size(32.dp)
+            onClick = onHide,
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+            shape = CircleShape,
+            modifier = Modifier.size(36.dp)
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
-                    Icons.Default.Translate,
+                    Icons.Default.KeyboardArrowDown,
                     null,
-                    modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.primary
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
         
         Row(
             modifier = Modifier.weight(1f),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             umlauts.forEach { umlaut ->
                 Surface(
                     onClick = { onUmlautClick(umlaut) },
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    color = MaterialTheme.colorScheme.surface,
                     shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier.size(width = 40.dp, height = 36.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                    modifier = Modifier
+                        .size(width = 38.dp, height = 42.dp),
+                    shadowElevation = 2.dp,
+                    border = androidx.compose.foundation.BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Text(
                             umlaut,
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }

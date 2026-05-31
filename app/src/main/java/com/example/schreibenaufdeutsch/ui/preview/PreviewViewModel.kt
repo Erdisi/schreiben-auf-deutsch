@@ -25,9 +25,9 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import java.util.Locale
 
-class PreviewViewModel(
-    private val taskRepository: TaskRepository,
-    private val aiRepository: AIRepository
+class PreviewViewModel @JvmOverloads constructor(
+    private val taskRepository: TaskRepository = SchreibenApp.instance.taskRepository,
+    private val aiRepository: AIRepository = SchreibenApp.instance.aiRepository
 ) : ViewModel() {
     
     private var tts: TextToSpeech? = null
@@ -51,6 +51,8 @@ class PreviewViewModel(
     private val _displayTask = MutableStateFlow<GeneratedTaskDto?>(null)
     val displayTaskState: StateFlow<GeneratedTaskDto?> = _displayTask
 
+    private var loadJob: kotlinx.coroutines.Job? = null
+
     init {
         viewModelScope.launch {
             PreferenceManager.translationLanguageFlow.collectLatest { language ->
@@ -58,13 +60,6 @@ class PreviewViewModel(
                     currentTargetLanguage = language
                     setupTranslator(language)
                 }
-            }
-        }
-
-        tts = TextToSpeech(SchreibenApp.instance) { status ->
-            if (status == TextToSpeech.SUCCESS) {
-                tts?.language = Locale.GERMANY
-                isTtsInitialized = true
             }
         }
     }
@@ -85,21 +80,54 @@ class PreviewViewModel(
     }
 
     fun speak(text: String) {
-        if (isTtsInitialized) {
+        if (tts == null) {
+            initTts {
+                tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
+            }
+        } else if (isTtsInitialized) {
             tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
         }
     }
 
+    private fun initTts(onReady: () -> Unit = {}) {
+        try {
+            tts = TextToSpeech(SchreibenApp.instance) { status ->
+                if (status == TextToSpeech.SUCCESS) {
+                    tts?.language = Locale.GERMANY
+                    isTtsInitialized = true
+                    onReady()
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     fun loadTask(taskId: Long) {
-        viewModelScope.launch {
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
             val task = taskRepository.getTaskById(taskId)
             _existingTask.value = task
-            task?.let { translateTask(it.title, it.description) }
+            if (task != null) {
+                // Convert DB entity to DTO for display state
+                val taskDto = GeneratedTaskDto(
+                    title = task.title,
+                    description = task.description,
+                    image_query = "",
+                    variations = task.variations.map { v ->
+                        VariationDto(v.text, v.translation)
+                    }
+                )
+                _displayTask.value = taskDto
+                translateTask(task.title, task.description)
+            }
         }
     }
 
     fun translateTask(title: String, description: String) {
         viewModelScope.launch {
+            _translatedTitle.value = "" // Reset translations for new task
+            _translatedDescription.value = ""
             translator?.translate(title)
                 ?.addOnSuccessListener { _translatedTitle.value = it }
             translator?.translate(description)
@@ -214,9 +242,14 @@ class PreviewViewModel(
     }
 
     fun setDisplayTask(task: GeneratedTaskDto) {
-        if (_displayTask.value == null) {
-            _displayTask.value = task
-        }
+        _displayTask.value = task
+    }
+
+    fun resetState() {
+        _displayTask.value = null
+        _existingTask.value = null
+        _translatedTitle.value = ""
+        _translatedDescription.value = ""
     }
 
     fun deleteTask(task: WritingTask) {

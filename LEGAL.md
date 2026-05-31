@@ -18,6 +18,7 @@ By using this App, you agree to the following:
 We take European privacy laws seriously:
 - **Data Minimization:** We do not collect names, emails, or device IDs.
 - **Processing:** Your typed text is sent to Google/Groq for the sole purpose of real-time correction. This data is not linked to your identity.
+- **Backup:** If enabled on your device, your local database may be backed up to your personal Google Drive via Android's Auto-Backup. This data is managed by Google and not accessible by the App developers.
 - **Right to be Forgotten:** You have full control. To delete all data associated with you, simply uninstall the App or clear the App Cache in Android Settings.
 
 ## 4. Third-Party Content

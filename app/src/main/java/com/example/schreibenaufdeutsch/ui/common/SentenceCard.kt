@@ -3,7 +3,6 @@ package com.example.schreibenaufdeutsch.ui.common
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.border
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -44,15 +43,17 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.TextFieldValue
 import com.example.schreibenaufdeutsch.R
 import com.example.schreibenaufdeutsch.ui.practice.PracticeSentence
+import com.example.schreibenaufdeutsch.ui.theme.LocalIsDarkTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SentenceCard(
     sentence: PracticeSentence,
-    currentInput: String = "",
-    onUserInputChange: (String) -> Unit = {},
+    currentInput: TextFieldValue = TextFieldValue(""),
+    onUserInputChange: (TextFieldValue) -> Unit = {},
     onSend: () -> Unit = {},
     onSpeak: () -> Unit,
     isScoreMode: Boolean = false,
@@ -89,17 +90,21 @@ fun SentenceCard(
     
     // Breathing glow animation
     val infiniteTransition = rememberInfiniteTransition(label = "glow")
-    val glowAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.3f,
-        targetValue = 0.8f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1500, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "glowAlpha"
-    )
+    val glowAlpha by if (sentence.isCurrent) {
+        infiniteTransition.animateFloat(
+            initialValue = 0.3f,
+            targetValue = 0.8f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(1500, easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse
+            ),
+            label = "glowAlpha"
+        )
+    } else {
+        remember { mutableStateOf(0.3f) }
+    }
 
-    val isInputPerfect = currentInput == sentence.germanText
+    val isInputPerfect = currentInput.text == sentence.germanText
 
     LaunchedEffect(sentence.hadError) {
         if (sentence.hadError && sentence.isCurrent) {
@@ -117,7 +122,7 @@ fun SentenceCard(
         }
     }
     
-    val isDark = isSystemInDarkTheme()
+    val isDark = LocalIsDarkTheme.current
     val backgroundColor = if (sentence.isCurrent) {
         if (isDark) Color(0xFF2C2C2C) else MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
     } else {
@@ -137,14 +142,14 @@ fun SentenceCard(
     val correctColor = if (isDark) Color(0xFF00E676) else MaterialTheme.colorScheme.primary
     val errorColor = MaterialTheme.colorScheme.error
 
-    val annotatedText = remember(currentInput, sentence.germanText, sentence.isCurrent, sentence.isCompleted, isScoreMode) {
+    val annotatedText = remember(currentInput.text, sentence.germanText, sentence.isCurrent, sentence.isCompleted, isScoreMode) {
         buildAnnotatedString {
             val target = sentence.germanText
-            if (sentence.isCurrent && currentInput.isNotEmpty()) {
+            if (sentence.isCurrent && currentInput.text.isNotEmpty()) {
                 var mismatchFound = false
                 for (i in target.indices) {
                     val targetChar = target[i]
-                    val inputChar = currentInput.getOrNull(i)
+                    val inputChar = currentInput.text.getOrNull(i)
 
                     if (!mismatchFound) {
                         if (inputChar == null) {
@@ -291,8 +296,8 @@ fun SentenceCard(
                 // Real-time Character Validation Annotated String
                 val inputAnnotatedText = buildAnnotatedString {
                     val target = sentence.germanText
-                    for (i in currentInput.indices) {
-                        val inputChar = currentInput[i]
+                    for (i in currentInput.text.indices) {
+                        val inputChar = currentInput.text[i]
                         val targetChar = target.getOrNull(i)
                         
                         if (targetChar != null && inputChar == targetChar) {
@@ -353,7 +358,7 @@ fun SentenceCard(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Box(modifier = Modifier.weight(1f)) {
-                                    if (currentInput.isEmpty()) {
+                                    if (currentInput.text.isEmpty()) {
                                         Text(
                                             stringResource(R.string.practice_write_here),
                                             style = MaterialTheme.typography.bodyLarge,
@@ -379,7 +384,7 @@ fun SentenceCard(
                                 
                                 IconButton(
                                     onClick = onSend,
-                                    enabled = currentInput.isNotBlank(),
+                                    enabled = currentInput.text.isNotBlank(),
                                     modifier = Modifier.size(28.dp)
                                 ) {
                                     AnimatedContent(
@@ -399,7 +404,7 @@ fun SentenceCard(
                                             Icon(
                                                 Icons.AutoMirrored.Filled.Send,
                                                 contentDescription = "Senden",
-                                                tint = if (currentInput.isBlank()) 
+                                                tint = if (currentInput.text.isBlank())
                                                     MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f) 
                                                 else MaterialTheme.colorScheme.primary
                                             )

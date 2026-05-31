@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schreiben auf Deutsch | Master German Writing with AI</title>
+    <meta name="description" content="Elevate your German writing skills with AI-powered practice tailored for Goethe, Telc, and DTB exams. Get real-time pedagogical feedback and master composition.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2196F3;
+            --secondary: #673AB7;
+            --text-main: #1A1C1E;
+            --text-muted: #44474E;
+            --bg-light: #F8F9FF;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-light); color: var(--text-main); line-height: 1.6; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+        /* Header */
+        header { padding: 40px 0; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--primary); text-decoration: none; }
+
+        /* Hero Section */
+        .hero { padding: 80px 0 120px; text-align: center; }
+        .badge { background: #E1E2EC; color: var(--text-muted); padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; display: inline-block; margin-bottom: 24px; }
+        h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.5rem, 8vw, 4.5rem); line-height: 1.1; margin-bottom: 24px; font-weight: 800; }
+        .hero p { font-size: 1.25rem; color: var(--text-muted); max-width: 600px; margin: 0 auto 40px; }
+        .cta-button { background: var(--text-main); color: white; padding: 18px 36px; border-radius: 12px; text-decoration: none; font-weight: 600; transition: transform 0.2s; display: inline-block; }
+        .cta-button:hover { transform: translateY(-2px); }
+
+        /* Features */
+        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; padding: 80px 0; }
+        .feature-card { background: white; padding: 40px; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); transition: box-shadow 0.3s; }
+        .feature-card:hover { box-shadow: 0 10px 40px rgba(0,0,0,0.06); }
+        .feature-icon { font-size: 2rem; margin-bottom: 20px; display: block; }
+        h3 { font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 12px; }
+        .feature-card p { color: var(--text-muted); font-size: 1rem; }
+
+        /* Mockup Placeholder */
+        .mockup { width: 100%; max-width: 800px; height: auto; min-height: 450px; background: #E1E2EC; margin: 40px auto; border-radius: 32px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 8px solid white; box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
+        .mockup img { width: 100%; height: auto; display: block; object-fit: cover; }
+
+        /* Screenshot Gallery */
+        .gallery-title { font-family: 'Playfair Display', serif; font-size: 2.5rem; text-align: center; margin: 80px 0 40px; }
+        .gallery { display: flex; overflow-x: auto; gap: 20px; padding: 20px 0 40px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+        .gallery::-webkit-scrollbar { height: 8px; }
+        .gallery::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        .gallery::-webkit-scrollbar-thumb { background: #888; border-radius: 10px; }
+        .gallery img { height: 500px; border-radius: 16px; scroll-snap-align: start; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+
+        /* Footer */
+        footer { padding: 60px 0; border-top: 1px solid #E1E2EC; text-align: center; }
+        .footer-links { margin-bottom: 24px; }
+        .footer-links a { color: var(--text-muted); text-decoration: none; margin: 0 15px; font-size: 0.9rem; transition: color 0.2s; }
+        .footer-links a:hover { color: var(--primary); }
+        .copyright { font-size: 0.8rem; color: #91909a; }
+
+        @media (max-width: 768px) {
+            .hero { padding: 40px 0 60px; }
+            .features { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <a href="#" class="logo">Schreiben.</a>
+    </header>
+
+    <section class="hero">
+        <span class="badge">Next-Gen Language Learning</span>
+        <h1>Stop translating.<br>Start composing.</h1>
+        <p>Master German writing through AI-powered deliberate practice. Tailored exercises for Goethe, Telc, and DTB exams.</p>
+        <a href="#download" class="cta-button">Download App</a>
+
+        <div class="mockup">
+            <img src="App%20screenshots/Home%20light%20mode.jpeg" alt="Schreiben auf Deutsch Home Screen">
+        </div>
+    </section>
+
+    <h2 class="gallery-title">Experience the Interface</h2>
+    <div class="gallery">
+        <img src="App%20screenshots/Home%20light%20mode.jpeg" alt="Home Light">
+        <img src="App%20screenshots/Home%20dark%20mode.jpeg" alt="Home Dark">
+        <img src="App%20screenshots/Practice%20screen%20light%20mode.jpeg" alt="Practice Light">
+        <img src="App%20screenshots/Practice%20screen%20dark%20mode.jpeg" alt="Practice Dark">
+        <img src="App%20screenshots/Task%20preview%20screen%20light%20mode.jpeg" alt="Preview Light">
+        <img src="App%20screenshots/Task%20preview%20screen%20dark%20mode.jpeg" alt="Preview Dark">
+        <img src="App%20screenshots/Examples%20library%20light%20mode.jpeg" alt="Library Light">
+        <img src="App%20screenshots/Examples%20library%20dark%20mode.jpeg" alt="Library Dark">
+    </div>
+
+    <section class="features">
+        <div class="feature-card">
+            <span class="feature-icon">🎯</span>
+            <h3>Exam-Ready Contexts</h3>
+            <p>From formal complaints to internal business emails. Practice the exact scenarios required for your C1, B2, or B1 certification.</p>
+        </div>
+        <div class="feature-card">
+            <span class="feature-icon">🧠</span>
+            <h3>Pedagogical AI Feedback</h3>
+            <p>Don't just fix errors—understand them. Our dual-AI engine explains grammar nuances and vocabulary choices in real-time.</p>
+        </div>
+        <div class="feature-card">
+            <span class="feature-icon">🛡️</span>
+            <h3>Privacy by Design</h3>
+            <p>Your learning data belongs to you. We store all history locally on your device. No accounts, no trackers, no compromises.</p>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-links">
+            <a href="privacy_policy.html">Privacy Policy</a>
+            <a href="LEGAL.md">Legal Terms</a>
+            <a href="https://github.com/Erdisi/Schreiben-auf-Deutsch">GitHub</a>
+            <a href="mailto:Erdisi@gmail.com">Support</a>
+        </div>
+        <p class="copyright">&copy; 2026 Erdis Driza. Built for the German Learning Community.</p>
+    </footer>
+</div>
+
+</body>
+</html>

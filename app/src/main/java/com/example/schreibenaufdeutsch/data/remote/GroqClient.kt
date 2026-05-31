@@ -75,10 +75,10 @@ object GroqClient {
                 if (response.isSuccessful) return@Interceptor response
                 
                 if (responseCode == 429) {
-                    val waitTime = (tryCount + 1) * 2000L
+                    val waitTime = (tryCount + 1) * 1000L // Reduced from 2000L
                     Thread.sleep(waitTime)
                 } else if (responseCode >= 500) {
-                    Thread.sleep(1000L)
+                    Thread.sleep(500L) // Reduced from 1000L
                 } else {
                     return@Interceptor response
                 }

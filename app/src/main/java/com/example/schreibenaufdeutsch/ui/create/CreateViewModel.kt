@@ -181,8 +181,12 @@ class CreateViewModel(
                        - Easy: One level lower than requested, simple grammar, ~100 words.
                        - Normal: Exact level requested, standard exam length (150-180 words).
                        - Advanced: Slightly above level, complex connectors (obwohl, darüber hinaus), ~200+ words.
-                    3. VARIATION DENSITY: Variations MUST consist of at least 8-16 sentences. Detailed scenarios only, NO summaries.
-                    4. Incorporate the provided "Extra Context" into the scenario and arguments of the variations.
+                    3. TASK DEPTH: Generate exactly ONE high-quality, comprehensive variation. 
+                    4. VARIATION DENSITY: The text MUST consist of 10-18 sentences to provide thorough practice.
+                    5. IMAGE RULE: The "image_query" MUST be in English. Focus strictly on professional objects, architecture, or clean cinematic environments relevant to the task. 
+                       - CRITICAL: Do NOT include humans, faces, or body parts. 
+                       - STYLE: Use 'Professional product photography' or 'Minimalist still life'.
+                    6. Incorporate the provided "Extra Context" into the scenario and arguments of the variations.
                 """.trimIndent()
 
                 val userPrompt = """

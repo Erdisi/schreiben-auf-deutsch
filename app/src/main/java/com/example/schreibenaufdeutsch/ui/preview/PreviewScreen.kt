@@ -65,13 +65,12 @@ fun PreviewScreen(
     val animatedVisibilityScope = if (sharedTransitionScope != null) LocalNavAnimatedContentScope.current else null
 
     val existingTask by viewModel.existingTask.collectAsStateWithLifecycle()
-    var selectedVariationIndex by remember { mutableIntStateOf(0) }
+    val selectedVariationIndex = 0 // Fixed to first variation
     
     val translatedTitle by viewModel.translatedTitle.collectAsStateWithLifecycle()
     val translatedDescription by viewModel.translatedDescription.collectAsStateWithLifecycle()
     
     val refreshingIndexes by viewModel.refreshingIndexes.collectAsStateWithLifecycle()
-    val displayTaskState by viewModel.displayTaskState.collectAsStateWithLifecycle()
 
     var showDeleteConfirmation by remember { mutableStateOf(false) }
 
@@ -87,43 +86,21 @@ fun PreviewScreen(
 
     BackHandler(onBack = onBack)
 
-    val displayTask = remember(generatedTask, existingTask, displayTaskState) {
-        if (displayTaskState != null) {
-            displayTaskState
+    val displayTask by viewModel.displayTaskState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(taskId, generatedTask) {
+        viewModel.resetState() // Clear old data immediately
+        if (taskId != null) {
+            viewModel.loadTask(taskId)
         } else if (generatedTask != null) {
             viewModel.setDisplayTask(generatedTask)
-            generatedTask
-        } else if (existingTask != null) {
-            val task = GeneratedTaskDto(
-                title = existingTask!!.title,
-                description = existingTask!!.description,
-                image_query = "",
-                variations = existingTask!!.variations.map { v ->
-                    VariationDto(v.text, v.translation)
-                }
-            )
-            viewModel.setDisplayTask(task)
-            task
-        } else {
-            null
+            viewModel.translateTask(generatedTask.title, generatedTask.description)
         }
     }
 
     val displayLevel = existingTask?.germanLevel ?: level
     val displayType = existingTask?.taskType ?: type
     val displayTone = existingTask?.tone ?: tone
-
-    LaunchedEffect(taskId) {
-        if (taskId != null) {
-            viewModel.loadTask(taskId)
-        }
-    }
-    
-    LaunchedEffect(displayTask) {
-        if (translatedTitle.isEmpty() && displayTask != null) {
-            viewModel.translateTask(displayTask.title, displayTask.description)
-        }
-    }
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
@@ -189,7 +166,8 @@ fun PreviewScreen(
             )
         }
     ) { padding ->
-        if (displayTask == null) {
+        val currentTask = displayTask
+        if (currentTask == null) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
@@ -201,11 +179,11 @@ fun PreviewScreen(
                         .padding(padding)
                         .verticalScroll(scrollState)
                 ) {
-                    val imageUrl = remember(existingTask, displayTask) {
+                    val imageUrl = remember(existingTask, currentTask) {
                         if (existingTask?.imageUrl != null) {
                             existingTask?.imageUrl
-                        } else if (displayTask.image_query.isNotBlank()) {
-                            val encodedQuery = java.net.URLEncoder.encode(displayTask.image_query, "UTF-8")
+                        } else if (currentTask.image_query.isNotBlank()) {
+                            val encodedQuery = java.net.URLEncoder.encode(currentTask.image_query, "UTF-8")
                             "https://image.pollinations.ai/prompt/$encodedQuery?nologo=true&seed=42&model=flux"
                         } else {
                             "https://images.unsplash.com/photo-1543002588-bfa74002ed7e"
@@ -247,9 +225,9 @@ fun PreviewScreen(
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Column(modifier = Modifier.padding(vertical = 16.dp)) {
+                            Column(modifier = Modifier.padding(vertical = 16.dp, horizontal = 16.dp)) {
                                 Text(
-                                    displayTask.title,
+                                    currentTask.title,
                                     style = MaterialTheme.typography.headlineSmall.copy(
                                         fontFamily = FontFamily.Serif
                                     ),
@@ -304,7 +282,7 @@ fun PreviewScreen(
                         }
 
                         Text(
-                            displayTask.description,
+                            currentTask.description,
                             style = MaterialTheme.typography.bodyLarge.copy(
                                 fontFamily = FontFamily.Serif
                             ),
@@ -312,69 +290,23 @@ fun PreviewScreen(
                             lineHeight = 24.sp
                         )
 
-                        if (translatedDescription.isNotEmpty() || displayTask.description.contains("(")) {
-                            val englishDesc = if (translatedDescription.isNotEmpty()) {
-                                translatedDescription
-                            } else {
-                                val start = displayTask.description.indexOf('(')
-                                val end = displayTask.description.lastIndexOf(')')
-                                if (start != -1 && end != -1 && end > start) {
-                                    displayTask.description.substring(start + 1, end)
-                                } else {
-                                    ""
-                                }
-                            }
-                            
-                            if (englishDesc.isNotEmpty()) {
-                                Text(
-                                    englishDesc,
-                                    style = MaterialTheme.typography.bodyMedium.copy(
-                                        fontFamily = FontFamily.Serif,
-                                        fontStyle = FontStyle.Italic
-                                    ),
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.padding(top = 8.dp)
-                                )
-                            }
-                        }
-
-                        Spacer(Modifier.height(24.dp))
-
-                        Text(
-                            "Antwort auswählen",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                        Spacer(Modifier.height(12.dp))
-
-                        SingleChoiceSegmentedButtonRow(
-                            modifier = Modifier.fillMaxWidth(),
-                            space = 0.dp
-                        ) {
-                            displayTask.variations.forEachIndexed { index, _ ->
-                                SegmentedButton(
-                                    selected = selectedVariationIndex == index,
-                                    onClick = { selectedVariationIndex = index },
-                                    shape = SegmentedButtonDefaults.itemShape(index = index, count = displayTask.variations.size),
-                                    icon = { SegmentedButtonDefaults.Icon(selectedVariationIndex == index) },
-                                    colors = SegmentedButtonDefaults.colors(
-                                        activeContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                                        activeContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                                        inactiveContainerColor = Color.Transparent
-                                    )
-                                ) {
-                                    Text("Option ${index + 1}")
-                                }
-                            }
+                        if (translatedDescription.isNotEmpty()) {
+                            Text(
+                                translatedDescription,
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontFamily = FontFamily.Serif,
+                                    fontStyle = FontStyle.Italic
+                                ),
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(top = 8.dp)
+                            )
                         }
 
                         Spacer(Modifier.height(24.dp))
                         HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
                         Spacer(Modifier.height(24.dp))
 
-                        val currentVariation = displayTask.variations.getOrNull(selectedVariationIndex)
+                        val currentVariation = currentTask.variations.getOrNull(selectedVariationIndex)
                         if (currentVariation != null) {
                             val sentences = remember(currentVariation) {
                                 val germanSentences = LanguageUtils.splitIntoSentences(currentVariation.text)
@@ -397,7 +329,7 @@ fun PreviewScreen(
                                         onSpeak = { viewModel.speak(sentence.germanText) },
                                         onRefreshSentence = {
                                             viewModel.refreshSentence(
-                                                displayTask,
+                                                currentTask,
                                                 selectedVariationIndex,
                                                 sentence.index,
                                                 displayLevel,
@@ -406,7 +338,7 @@ fun PreviewScreen(
                                         },
                                         onEditSentence = { newText ->
                                             viewModel.updateSentence(
-                                                displayTask,
+                                                currentTask,
                                                 selectedVariationIndex,
                                                 sentence.index,
                                                 newText
@@ -507,12 +439,12 @@ fun PreviewScreenPreview() {
             generatedTask = GeneratedTaskDto(
                 title = "Beschwerde: Defektes Smartphone",
                 description = "Sie haben online ein Smartphone gekauft, aber es ist defekt angekommen. Schreiben Sie eine E-Mail an den Kundenservice.",
+                image_query = "broken smartphone on a table",
                 variations = listOf(
                     VariationDto(
                         "Sehr geehrte Damen und Herren,\n\nhiermit möchte ich mich über das Smartphone beschweren, das ich am letzten Dienstag bei Ihnen bestellt habe.",
                         "Dear Sirs and Madames,\n\nI would like to complain about the smartphone that I ordered on the last Tuesday."
-                    ),
-                    VariationDto("Hallo Team...", "Hello Team...")
+                    )
                 )
             ),
             level = "B2",

@@ -14,12 +14,13 @@ To provide AI features, the following happens:
 - **Corrections:** Your submitted text is sent to these providers to check for grammar errors.
 - **Encryption:** All data transmission happens over secure HTTPS connections.
 
-## 3. Local Storage
+## 3. Local Storage & Backups
 The App uses a **Room Database** on your device to store:
 - Completed tasks and scores.
 - Your "Favorite" tasks.
 - App settings (e.g., preferred translation language).
-This data **never leaves your phone** and is deleted when the app is uninstalled.
+
+**Data Control:** This data remains under your control. It is stored locally on your device and, if enabled in your Android system settings, may be automatically backed up to your personal Google Drive account via the standard Android Auto-Backup service. We (the developers) do not have access to this data on any external servers.
 
 ## 4. Your Rights
 Under GDPR, you have the right to access, rectify, or erase your data. Since we do not store your data on our servers, you can exercise these rights directly through the App interface by deleting specific tasks or uninstalling the app.

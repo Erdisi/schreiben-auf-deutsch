@@ -13,12 +13,21 @@ class SettingsViewModel : ViewModel() {
     val selectedLanguage: StateFlow<String> = PreferenceManager.translationLanguageFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), TranslateLanguage.ENGLISH)
 
+    val themeMode: StateFlow<String> = PreferenceManager.themeModeFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "System")
+
     val isDeveloperMode: StateFlow<Boolean> = PreferenceManager.isDeveloperModeFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     fun updateTranslationLanguage(languageCode: String) {
         viewModelScope.launch {
             PreferenceManager.setTranslationLanguage(languageCode)
+        }
+    }
+
+    fun updateThemeMode(mode: String) {
+        viewModelScope.launch {
+            PreferenceManager.setThemeMode(mode)
         }
     }
 

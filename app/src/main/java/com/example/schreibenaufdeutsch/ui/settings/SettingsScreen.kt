@@ -35,6 +35,7 @@ fun SettingsScreen(
 
     val uriHandler = LocalUriHandler.current
     val selectedLanguage by viewModel.selectedLanguage.collectAsStateWithLifecycle()
+    val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
     val isDeveloperMode by viewModel.isDeveloperMode.collectAsStateWithLifecycle()
     
     val sheetState = rememberModalBottomSheetState()
@@ -95,6 +96,25 @@ fun SettingsScreen(
                 "Nutzen Sie die KI, um neue Aufgaben zu generieren und Feedback zu Ihren Fehlern zu erhalten.",
                 style = MaterialTheme.typography.bodySmall
             )
+
+            HorizontalDivider()
+
+            Text("Erscheinungsbild", style = MaterialTheme.typography.titleMedium)
+            
+            val themeOptions = listOf("System", "Light", "Dark")
+            SingleChoiceSegmentedButtonRow(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                themeOptions.forEachIndexed { index, label ->
+                    SegmentedButton(
+                        shape = SegmentedButtonDefaults.itemShape(index = index, count = themeOptions.size),
+                        onClick = { viewModel.updateThemeMode(label) },
+                        selected = themeMode == label
+                    ) {
+                        Text(label)
+                    }
+                }
+            }
 
             HorizontalDivider()
 
@@ -170,7 +190,7 @@ fun SettingsScreen(
             }
 
             OutlinedButton(
-                onClick = { uriHandler.openUri("https://github.com/erdisdriza/SchreibenaufDeutsch/blob/main/PRIVACY.md") },
+                onClick = { uriHandler.openUri("https://erdisi.github.io/Schreiben-auf-Deutsch/privacy_policy.html") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
             ) {

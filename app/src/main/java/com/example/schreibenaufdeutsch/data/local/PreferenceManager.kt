@@ -24,10 +24,16 @@ object PreferenceManager {
     private val DAILY_TASK_COUNT_KEY = intPreferencesKey("daily_task_count")
     private val LAST_RESET_DATE_KEY = stringPreferencesKey("last_reset_date")
     private val IS_DEVELOPER_MODE_KEY = booleanPreferencesKey("is_developer_mode")
+    private val THEME_MODE_KEY = stringPreferencesKey("theme_mode")
 
     val translationLanguageFlow: Flow<String> = SchreibenApp.instance.dataStore.data
         .map { preferences ->
             preferences[TRANSLATION_LANGUAGE_KEY] ?: TranslateLanguage.ENGLISH
+        }
+
+    val themeModeFlow: Flow<String> = SchreibenApp.instance.dataStore.data
+        .map { preferences ->
+            preferences[THEME_MODE_KEY] ?: "System"
         }
 
     val isDeveloperModeFlow: Flow<Boolean> = SchreibenApp.instance.dataStore.data
@@ -38,6 +44,12 @@ object PreferenceManager {
     suspend fun setTranslationLanguage(languageCode: String) {
         SchreibenApp.instance.dataStore.edit { preferences ->
             preferences[TRANSLATION_LANGUAGE_KEY] = languageCode
+        }
+    }
+
+    suspend fun setThemeMode(mode: String) {
+        SchreibenApp.instance.dataStore.edit { preferences ->
+            preferences[THEME_MODE_KEY] = mode
         }
     }
 

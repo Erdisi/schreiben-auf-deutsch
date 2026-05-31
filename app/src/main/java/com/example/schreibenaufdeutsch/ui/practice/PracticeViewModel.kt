@@ -36,9 +36,9 @@ data class PracticeSentence(
     val lastInput: String = ""
 )
 
-class PracticeViewModel(
-    private val taskRepository: TaskRepository,
-    private val aiRepository: AIRepository
+class PracticeViewModel @JvmOverloads constructor(
+    private val taskRepository: TaskRepository = SchreibenApp.instance.taskRepository,
+    private val aiRepository: AIRepository = SchreibenApp.instance.aiRepository
 ) : ViewModel() {
 
     private var tts: TextToSpeech? = null
@@ -62,22 +62,27 @@ class PracticeViewModel(
     private val _submissionResult = MutableSharedFlow<Boolean>()
     val submissionResult: SharedFlow<Boolean> = _submissionResult.asSharedFlow()
 
-    init {
+    fun speak(text: String) {
+        if (tts == null) {
+            initTts {
+                tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
+            }
+        } else if (isTtsInitialized) {
+            tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
+        }
+    }
+
+    private fun initTts(onReady: () -> Unit = {}) {
         try {
             tts = TextToSpeech(SchreibenApp.instance) { status ->
                 if (status == TextToSpeech.SUCCESS) {
                     tts?.language = Locale.GERMANY
                     isTtsInitialized = true
+                    onReady()
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
-        }
-    }
-
-    fun speak(text: String) {
-        if (isTtsInitialized) {
-            tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
         }
     }
 

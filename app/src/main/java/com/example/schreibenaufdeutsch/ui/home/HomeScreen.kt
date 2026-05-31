@@ -47,6 +47,7 @@ import com.example.schreibenaufdeutsch.ui.common.TaskCard
 import com.example.schreibenaufdeutsch.ui.common.Template
 import com.example.schreibenaufdeutsch.ui.common.allTemplates
 import com.example.schreibenaufdeutsch.ui.common.viewmodel.viewModelFactory
+import com.example.schreibenaufdeutsch.ui.theme.LocalIsDarkTheme
 import com.example.schreibenaufdeutsch.ui.theme.SchreibenAufDeutschTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -159,7 +160,7 @@ private fun GreetingHeader(onSettingsClick: () -> Unit) {
 
 @Composable
 private fun HeroCard(onAction: () -> Unit) {
-    val isDark = androidx.compose.foundation.isSystemInDarkTheme()
+    val isDark = LocalIsDarkTheme.current
     val gradientColors = if (isDark) {
         listOf(
             MaterialTheme.colorScheme.primaryContainer,
